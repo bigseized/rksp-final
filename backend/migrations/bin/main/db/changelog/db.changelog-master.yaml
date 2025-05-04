@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: users
+      author: buba
+      changes:
+        - sqlFile:
+            path: changesets/001-create-users-table.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: chat-tables
+      author: buba
+      changes:
+        - sqlFile:
+            path: changesets/002-create-chat-tables.sql
+            relativeToChangelogFile: true

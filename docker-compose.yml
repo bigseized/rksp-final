@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - auth_network
+
+  auth_provider:
+    build:
+      context: .
+      dockerfile: backend/dockerfiles/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/soika
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    depends_on:
+      - migrations
+    networks:
+      - auth_network
+
+  chat:
+    build:
+      context: ./backend
+      dockerfile: dockerfiles/Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/soika
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    depends_on:
+      - auth_provider
+      - postgres
+    networks:
+      - auth_network
+      
+  migrations:
+    image: liquibase/liquibase:4.25
+    depends_on:
+      - postgres
+    command:
+      - --changelog-file=migrations/db/changelog/db.changelog-master.yaml
+      - --driver=org.postgresql.Driver
+      - --url=jdbc:postgresql://postgres:5432/soika
+      - --username=postgres
+      - --password=postgres
+      - update
+    volumes:
+      - ./backend/migrations/src/main/resources:/liquibase/migrations
+    networks:
+      - auth_network
+
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=soika
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - auth_network
+
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - auth_network
+
+volumes:
+  postgres_data:
+  minio_data:
+
+networks:
+  auth_network:
+    driver: bridge 

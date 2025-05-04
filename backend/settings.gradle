@@ -1,0 +1,5 @@
+rootProject.name = 'backend'
+
+include 'auth_provider'
+include 'migrations'
+include 'chat' 

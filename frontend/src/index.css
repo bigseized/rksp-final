@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Кастомные стили для уведомлений */
+.Toastify__toast-container {
+  width: 320px !important;
+}
+
+.Toastify__toast {
+  min-height: 40px !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  margin-bottom: 8px !important;
+}
+
+.Toastify__toast--error {
+  background: rgba(254, 202, 202, 0.95) !important;
+  color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.Toastify__toast--success {
+  background: rgba(187, 247, 208, 0.95) !important;
+  color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.Toastify__toast-body {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.Toastify__progress-bar {
+  height: 2px !important;
+}
+
+.Toastify__progress-bar--error {
+  background: rgba(220, 38, 38, 0.3) !important;
+}
+
+.Toastify__progress-bar--success {
+  background: rgba(34, 197, 94, 0.3) !important;
+}
+
+.Toastify__close-button {
+  color: rgba(0, 0, 0, 0.85) !important;
+  opacity: 0.7 !important;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1 !important;
+}
+
+/* Иконки для уведомлений */
+.Toastify__toast--error::before {
+  position: absolute !important;
+  left: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  font-size: 16px !important;
+  color: rgba(220, 38, 38, 0.8) !important;
+}
+
+.Toastify__toast--success::before {
+  content: "✓" !important;
+  position: absolute !important;
+  left: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  font-size: 16px !important;
+  color: rgba(34, 197, 94, 0.8) !important;
+}
+
+.Toastify__toast-body {
+  margin-left: 24px !important;
+}
+
+/* Переопределение стандартных стилей react-toastify */
+.Toastify__toast--error {
+  --toastify-color-error: rgba(254, 202, 202, 0.95) !important;
+  --toastify-text-color-error: rgba(0, 0, 0, 0.85) !important;
+  --toastify-color-progress-error: rgba(220, 38, 38, 0.3) !important;
+}
+
+.Toastify__toast--success {
+  --toastify-color-success: rgba(187, 247, 208, 0.95) !important;
+  --toastify-text-color-success: rgba(0, 0, 0, 0.85) !important;
+  --toastify-color-progress-success: rgba(34, 197, 94, 0.3) !important;
+} 
