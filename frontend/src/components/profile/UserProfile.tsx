@@ -1,27 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
+import { API_CONFIG } from '../../config';
+
+const API_URL = API_CONFIG.CHAT_API_URL;
 
 const UserProfile = () => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState(user?.displayUsername || '');
   const [avatar, setAvatar] = useState<File | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchAvatar = async () => {
+      if (user?.id) {
+        try {
+          const token = localStorage.getItem('token');
+          const response = await axios.get(`${API_URL}/users/${user.id}/avatar`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            responseType: 'blob'
+          });
+          
+          if (response.data) {
+            const objectUrl = URL.createObjectURL(response.data);
+            setAvatarUrl(objectUrl);
+          }
+        } catch (err) {
+          console.error('Failed to fetch avatar:', err);
+        }
+      }
+    };
+
+    fetchAvatar();
+  }, [user?.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement profile update logic
+    const token = localStorage.getItem('token');
     try {
-      const formData = new FormData();
-      formData.append('username', username);
-      if (avatar) {
-        formData.append('avatar', avatar);
+      if (username !== user?.displayUsername) {
+        await axios.put(`${API_URL}/users/${user?.id}/username`, null, {
+          params: { username },
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
       }
 
-      // TODO: Make API call to update profile
+      if (avatar) {
+        const formData = new FormData();
+        formData.append('file', avatar);
+        await axios.post(`${API_URL}/users/${user?.id}/avatar`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        // После загрузки нового аватара обновляем изображение
+        const response = await axios.get(`${API_URL}/users/${user?.id}/avatar`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          responseType: 'blob'
+        });
+        const objectUrl = URL.createObjectURL(response.data);
+        setAvatarUrl(objectUrl);
+      }
+
       setIsEditing(false);
+      // TODO: Обновить данные пользователя в контексте
     } catch (err) {
-      setError('Failed to update profile');
+      setError('Не удалось обновить профиль');
     }
   };
 
@@ -31,14 +84,38 @@ const UserProfile = () => {
     }
   };
 
+  const handleDeleteAvatar = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      await axios.delete(`${API_URL}/users/${user?.id}/avatar`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      setAvatarUrl(null);
+      // TODO: Обновить данные пользователя в контексте
+    } catch (err) {
+      setError('Не удалось удалить аватар');
+    }
+  };
+
+  // Очищаем URL при размонтировании компонента
+  useEffect(() => {
+    return () => {
+      if (avatarUrl) {
+        URL.revokeObjectURL(avatarUrl);
+      }
+    };
+  }, [avatarUrl]);
+
   return (
     <div className="max-w-2xl mx-auto p-4">
       <div className="bg-white shadow rounded-lg p-6">
         <div className="flex items-center space-x-6 mb-4">
           <div className="relative">
-            {user?.avatar ? (
+            {avatarUrl ? (
               <img
-                src={user.avatar}
+                src={avatarUrl}
                 alt="Profile"
                 className="h-24 w-24 rounded-full object-cover"
               />
@@ -69,6 +146,26 @@ const UserProfile = () => {
                   />
                 </svg>
               </label>
+            )}
+            {isEditing && avatarUrl && (
+              <button
+                onClick={handleDeleteAvatar}
+                className="absolute bottom-0 left-0 bg-red-600 rounded-full p-2 cursor-pointer"
+              >
+                <svg
+                  className="h-4 w-4 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+              </button>
             )}
           </div>
           <div>

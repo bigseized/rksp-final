@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { chatService } from '../../services/chatService';
+import axios from 'axios';
+import { API_CONFIG } from '../../config';
+
+const API_URL = API_CONFIG.CHAT_API_URL;
 
 interface Chat {
     id: number;
     name: string;
     description: string;
     personal: boolean;
+    interlocutorId?: number;
 }
 
 interface ChatListProps {
@@ -22,6 +27,46 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, chats, loading
     const [showNewChatForm, setShowNewChatForm] = useState(false);
     const [showGroupChats, setShowGroupChats] = useState(true);
     const [showPrivateChats, setShowPrivateChats] = useState(true);
+    const [avatarUrls, setAvatarUrls] = useState<Record<number, string>>({});
+
+    useEffect(() => {
+        const fetchAvatars = async () => {
+            const newAvatarUrls: Record<number, string> = {};
+            const promises = chats
+                .filter(chat => chat.personal && chat.interlocutorId)
+                .map(async chat => {
+                    try {
+                        const token = localStorage.getItem('token');
+                        const response = await axios.get(`${API_URL}/users/${chat.interlocutorId}/avatar`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            },
+                            responseType: 'blob'
+                        });
+                        
+                        if (response.data) {
+                            const objectUrl = URL.createObjectURL(response.data);
+                            newAvatarUrls[chat.interlocutorId!] = objectUrl;
+                        }
+                    } catch (err) {
+                        console.error(`Failed to fetch avatar for user ${chat.interlocutorId}:`, err);
+                    }
+                });
+
+            await Promise.all(promises);
+            
+            // Очищаем старые URL перед установкой новых
+            Object.values(avatarUrls).forEach(url => URL.revokeObjectURL(url));
+            setAvatarUrls(newAvatarUrls);
+        };
+
+        fetchAvatars();
+
+        return () => {
+            // Очищаем URL при размонтировании компонента
+            Object.values(avatarUrls).forEach(url => URL.revokeObjectURL(url));
+        };
+    }, [chats]);
 
     const handleCreateChat = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -44,7 +89,7 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, chats, loading
     const privateChats = chats.filter(chat => chat.personal);
 
     return (
-        <div className="chat-list p-4">
+        <div className="p-4">
             <button
                 onClick={() => setShowNewChatForm(true)}
                 className="mb-4 w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
@@ -116,11 +161,21 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, chats, loading
                 {showPrivateChats && privateChats.map(chat => (
                     <div
                         key={chat.id}
-                        className="chat-item p-4 border-b cursor-pointer hover:bg-gray-100"
+                        className="chat-item p-4 border-b cursor-pointer hover:bg-gray-100 flex items-center space-x-3"
                         onClick={() => onSelectChat(chat.id)}
                     >
+                        {chat.interlocutorId && avatarUrls[chat.interlocutorId] ? (
+                            <img
+                                src={avatarUrls[chat.interlocutorId]}
+                                alt="Profile"
+                                className="w-10 h-10 rounded-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-xl">
+                                {chat.name.charAt(0).toUpperCase()}
+                            </div>
+                        )}
                         <h3 className="font-bold">{chat.name}</h3>
-                        <p className="text-gray-600">{chat.description}</p>
                     </div>
                 ))}
             </div>

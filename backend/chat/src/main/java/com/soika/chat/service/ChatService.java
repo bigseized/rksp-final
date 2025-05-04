@@ -138,11 +138,8 @@ public class ChatService {
 
                     if (chat.getIsPersonal()) {
                         User targetUser = userChatRepository.findByChatIdAndNotUserId(userId, chat).orElse(user);
-
-                        String interlocutorName = targetUser.getUsername();
-
-                        dto.setName(interlocutorName);
-                        dto.setDescription("Личная переписка");
+                        dto.setName(targetUser.getUsername());
+                        dto.setInterlocutorId(targetUser.getId());
                     } else {
                         dto.setName(chat.getName());
                         dto.setDescription(chat.getDescription());

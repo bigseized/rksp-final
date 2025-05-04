@@ -3,26 +3,38 @@ package com.soika.chat.service;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import io.minio.GetObjectArgs;
+import io.minio.GetPresignedObjectUrlArgs;
+import io.minio.http.Method;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
+@Slf4j
 public class S3Service {
 
     private final MinioClient minioClient;
     private final String bucketName;
+    private final int presignedUrlExpirationMinutes;
 
-    public S3Service(MinioClient minioClient, @Value("${minio.bucket}") String bucketName) {
+    public S3Service(MinioClient minioClient, 
+                    @Value("${minio.bucket}") String bucketName,
+                    @Value("${minio.presigned-url-expiration:60}") int presignedUrlExpirationMinutes) {
         this.minioClient = minioClient;
         this.bucketName = bucketName;
+        this.presignedUrlExpirationMinutes = presignedUrlExpirationMinutes;
     }
+    
 
     public String uploadFile(MultipartFile file) throws Exception {
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-        
+
         minioClient.putObject(PutObjectArgs.builder()
                 .bucket(bucketName)
                 .object(fileName)
@@ -38,5 +50,18 @@ public class S3Service {
                 .bucket(bucketName)
                 .object(fileName)
                 .build());
+    }
+
+    public InputStream getFile(String fileName) throws Exception {
+        if (fileName == null) {
+            return null;
+        }
+        
+        return minioClient.getObject(
+            GetObjectArgs.builder()
+                .bucket(bucketName)
+                .object(fileName)
+                .build()
+        );
     }
 } 

@@ -5,15 +5,22 @@ import com.soika.chat.model.entity.User;
 import com.soika.chat.service.S3Service;
 import com.soika.chat.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
+@Slf4j
 @RequiredArgsConstructor
 public class UserController {
 
@@ -61,6 +68,34 @@ public class UserController {
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to delete avatar");
+        }
+    }
+
+    @GetMapping("/{userId}/avatar")
+    public ResponseEntity<InputStreamResource> getAvatar(@PathVariable Long userId) {
+        try {
+            String avatarFileName = userService.getCurrentAvatar(userId);
+            if (avatarFileName == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            InputStream inputStream = s3Service.getFile(avatarFileName);
+            if (inputStream == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_JPEG);
+            headers.setContentDispositionFormData("attachment", avatarFileName);
+
+            return ResponseEntity.ok()
+                .headers(headers)
+                .body(new InputStreamResource(inputStream));
+
+        } catch (HttpClientErrorException exception){
+            return ResponseEntity.status(exception.getStatusCode()).build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 } 

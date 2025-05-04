@@ -3,6 +3,10 @@ import { useAuth } from '../context/AuthContext';
 import { chatService } from '../services/chatService';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import axios from 'axios';
+import { API_CONFIG } from '../config';
+
+const API_URL = API_CONFIG.CHAT_API_URL;
 
 interface User {
     id: number;
@@ -22,8 +26,42 @@ const Header: React.FC<HeaderProps> = ({ onChatsUpdate }) => {
     const [searchResults, setSearchResults] = useState<User[]>([]);
     const [showSearchResults, setShowSearchResults] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const searchRef = useRef<HTMLDivElement>(null);
     const profileRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const fetchAvatar = async () => {
+            if (user?.id) {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await axios.get(`${API_URL}/users/${user.id}/avatar`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        responseType: 'blob'
+                    });
+                    
+                    if (response.data) {
+                        const objectUrl = URL.createObjectURL(response.data);
+                        setAvatarUrl(objectUrl);
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch avatar:', err);
+                }
+            }
+        };
+
+        fetchAvatar();
+    }, [user?.id]);
+
+    useEffect(() => {
+        return () => {
+            if (avatarUrl) {
+                URL.revokeObjectURL(avatarUrl);
+            }
+        };
+    }, [avatarUrl]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -161,9 +199,17 @@ const Header: React.FC<HeaderProps> = ({ onChatsUpdate }) => {
                             onClick={handleProfileClick}
                             className="flex items-center space-x-2 focus:outline-none"
                         >
-                            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-xl">
-                                {user.displayUsername.charAt(0).toUpperCase()}
-                            </div>
+                            {avatarUrl ? (
+                                <img
+                                    src={avatarUrl}
+                                    alt="Profile"
+                                    className="w-10 h-10 rounded-full object-cover"
+                                />
+                            ) : (
+                                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-xl">
+                                    {user.displayUsername.charAt(0).toUpperCase()}
+                                </div>
+                            )}
                             <span className="font-medium">{user.displayUsername}</span>
                             {user.authorities.map((auth, index) => (
                                 <span 

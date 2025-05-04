@@ -10,4 +10,5 @@ public class ChatDto {
     private String description;
     @JsonProperty("personal")
     private boolean isPersonal;
+    private Long interlocutorId;
 } 

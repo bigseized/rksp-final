@@ -3,12 +3,16 @@ package com.soika.chat.service;
 import com.soika.chat.model.entity.User;
 import com.soika.chat.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
@@ -27,6 +31,7 @@ public class UserService {
 
     @Transactional
     public void updateAvatar(Long userId, String avatarPath) {
+        log.debug("Updating user avatar");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         user.setAvatar(avatarPath);
@@ -36,6 +41,6 @@ public class UserService {
     public String getCurrentAvatar(Long userId) {
         return userRepository.findById(userId)
                 .map(User::getAvatar)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.BAD_REQUEST, "User or image are not found"));
     }
 }

@@ -88,6 +88,20 @@ services:
     command: server /data --console-address ":9001"
     networks:
       - auth_network
+  
+  init-minio:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/mc config host add local http://minio:9000 minioadmin minioadmin) do sleep 1; done;
+      /usr/bin/mc mb local/avatars;
+      /usr/bin/mc policy set public local/avatars;
+      echo 'Bucket ready';
+      "
+    networks:
+      - auth_network
 
 volumes:
   postgres_data:
