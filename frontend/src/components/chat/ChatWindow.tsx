@@ -14,9 +14,10 @@ interface Message {
 
 interface ChatWindowProps {
     chatId: number;
+    isPersonal: boolean;
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, isPersonal }) => {
     const { user, loading } = useAuth();
     const navigate = useNavigate();
     const [messages, setMessages] = useState<Message[]>([]);
@@ -26,6 +27,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [panelWidth, setPanelWidth] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
+    const [chat, setChat] = useState<any>(null);
     const minPanelWidth = 200;
     const maxPanelWidth = 500;
     const isResizing = useRef(false);
@@ -36,7 +38,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
             console.error('Пользователь не авторизован');
             return;
         }
-    }, [user, loading]);
+
+        const fetchChatInfo = async () => {
+            try {
+                const chatInfo = await chatService.getChat(chatId);
+                setChat(chatInfo);
+            } catch (error) {
+                console.error('Failed to fetch chat info:', error);
+            }
+        };
+
+        fetchChatInfo();
+    }, [user, loading, chatId]);
 
     useEffect(() => {
         const fetchMessages = async () => {
@@ -161,7 +174,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
             {/* Основная часть чата */}
             <div className="flex flex-col flex-1 h-full">
                 {/* Кнопка открытия панели */}
-                {!isPanelOpen && (
+                {!isPanelOpen && !isPersonal && (
                     <button
                         className="absolute top-4 right-4 z-20 bg-white border rounded-full shadow p-2"
                         onClick={() => setIsPanelOpen(true)}

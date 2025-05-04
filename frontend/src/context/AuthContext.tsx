@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { websocketService } from '../services/websocketService';
+import { chatService } from '../services/chatService';
 
 export interface User {
   id: number;
@@ -24,6 +26,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -51,6 +54,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (response.data) {
         setUser(response.data);
+        chatService.clearChats();
+        await chatService.getChats();
       } else {
         throw new Error('Invalid user data');
       }
@@ -58,6 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Auth check failed:', error);
       localStorage.removeItem('token');
       setUser(null);
+      chatService.clearChats();
     } finally {
       setLoading(false);
     }
@@ -90,8 +96,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    // Очищаем localStorage
+    localStorage.clear();
+    
+    // Очищаем sessionStorage
+    sessionStorage.clear();
+    
+    // Очищаем cookies
+    document.cookie.split(";").forEach(function(c) { 
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+    });
+    
+    // Очищаем кэш сервиса
+    chatService.clearChats();
+    
+    // Отключаем WebSocket
+    websocketService.disconnect();
+    
+    // Сбрасываем состояние
     setUser(null);
+    
+    // Принудительно очищаем кэш браузера
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        for (let name of names) {
+          caches.delete(name);
+        }
+      });
+    }
+    
+    // Перезагружаем страницу для полной очистки
+    window.location.href = '/';
   };
 
   const updateUser = (userData: User) => {

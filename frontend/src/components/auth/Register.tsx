@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-const Register = () => {
+interface RegisterProps {
+  showTitle?: boolean;
+}
+
+const Register: React.FC<RegisterProps> = ({ showTitle = true }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
@@ -10,11 +14,20 @@ const Register = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
 
+  useEffect(() => {
+    return () => {
+      setEmail('');
+      setPassword('');
+      setUsername('');
+      setError('');
+    };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await register(email, password, username);
-      navigate('/chat');
+      navigate('/chats');
     } catch (err) {
       setError('Registration failed. Please try again.');
     }
@@ -23,11 +36,13 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Создать аккаунт в Soika
-          </h2>
-        </div>
+        {showTitle && (
+          <div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              Создать аккаунт в Soika
+            </h2>
+          </div>
+        )}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
             <div className="rounded-md bg-red-50 p-4">

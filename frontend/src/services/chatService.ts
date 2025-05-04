@@ -30,9 +30,18 @@ interface ChatService {
     promoteToAdmin(chatId: number, userId: number): Promise<void>;
     demoteFromAdmin(chatId: number, userId: number): Promise<void>;
     leaveChat(chatId: number): Promise<void>;
+    getChat(chatId: number): Promise<any>;
+    clearChats(): void;
+    chats: any[];
 }
 
 export const chatService: ChatService = {
+    chats: [],
+
+    clearChats() {
+        this.chats = [];
+    },
+
     async getChats() {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -199,5 +208,10 @@ export const chatService: ChatService = {
                 'Authorization': `Bearer ${token}`
             }
         });
+    },
+
+    getChat: async (chatId: number) => {
+        const response = await axios.get(`${API_URL}/chats/${chatId}`);
+        return response.data;
     }
 }; 

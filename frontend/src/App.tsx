@@ -10,6 +10,7 @@ import { ChatWindow } from './components/chat/ChatWindow';
 import UserProfile from './components/profile/UserProfile';
 import Header from './components/Header';
 import { chatService } from './services/chatService';
+import AuthPage from './components/auth/AuthPage';
 
 interface PrivateRouteProps {
     children: React.ReactNode;
@@ -66,8 +67,8 @@ const App: React.FC = () => {
                         className="custom-toast-container"
                     />
                     <Routes>
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
+                        <Route path="/login" element={<AuthPage />} />
+                        <Route path="/register" element={<Navigate to="/login" replace />} />
                         <Route path="/" element={<Navigate to="/chats" replace />} />
                         <Route
                             path="/chats"
@@ -81,7 +82,10 @@ const App: React.FC = () => {
                                             </div>
                                             <div className="flex-1 h-full">
                                                 {selectedChatId ? (
-                                                    <ChatWindow chatId={selectedChatId} />
+                                                    <ChatWindow 
+                                                        chatId={selectedChatId} 
+                                                        isPersonal={chats.find(chat => chat.id === selectedChatId)?.personal || false} 
+                                                    />
                                                 ) : (
                                                     <div className="flex items-center justify-center h-full">
                                                         <p>Select a chat to start messaging</p>
