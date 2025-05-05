@@ -17,6 +17,10 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
 
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow();
+    }
+
     public List<User> searchUsers(String query) {
         return userRepository.findMatchingByUsername(query);
     }

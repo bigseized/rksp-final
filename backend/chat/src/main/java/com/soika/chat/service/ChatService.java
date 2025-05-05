@@ -266,6 +266,8 @@ public class ChatService {
     }
 
     private ChatMessageDto convertToMessageDto(ChatMessage message) {
-        return ChatMessageDto.fromEntity(message);
+        ChatMessageDto dto = ChatMessageDto.fromEntity(message);
+        dto.setEmail(message.getUser().getEmail());
+        return dto;
     }
 }

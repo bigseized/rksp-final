@@ -38,9 +38,10 @@ public class JwtWebSocketInterceptor implements ChannelInterceptor {
             );
 
             authContext.register(accessor.getSessionId(), auth);
-        }
-        else if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+            authContext.setUserId(accessor.getSessionId(), response.getId());
+        } else if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
             authContext.remove(accessor.getSessionId());
+            authContext.removeUserId(accessor.getSessionId());
         }
 
         return message;

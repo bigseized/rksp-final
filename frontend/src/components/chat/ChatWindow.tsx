@@ -10,6 +10,7 @@ interface Message {
     content: string;
     sender: string;
     timestamp: string;
+    email: string;
 }
 
 interface ChatWindowProps {
@@ -206,12 +207,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, isPersonal }) =>
                         <div
                             key={message.id}
                             className={`mb-4 flex ${
-                                message.sender === user?.username ? 'flex-row-reverse' : 'flex-row'
+                                message.email === user?.username ? 'flex-row-reverse' : 'flex-row'
                             }`}
                         >
                             <div
                                 className={`rounded-lg p-3 max-w-xs break-words ${
-                                    message.sender === user?.username
+                                    message.email === user?.username
                                         ? 'bg-blue-500 text-white ml-4'
                                         : 'bg-gray-200 text-gray-800 mr-4'
                                 }`}

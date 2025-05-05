@@ -3,6 +3,7 @@ package com.soika.chat.controller;
 import com.soika.chat.config.ws_security.WebSocketAuthContext;
 import com.soika.chat.model.dto.ChatMessageDto;
 import com.soika.chat.service.MessageService;
+import com.soika.chat.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -24,6 +25,7 @@ public class WebSocketController {
     private final SimpMessagingTemplate messagingTemplate;
     private final MessageService messageService;
     private final WebSocketAuthContext authContext;
+    private final UserService userService;
 
     @MessageMapping("/chat/{chatId}/sendMessage")
     public void sendMessage(
@@ -38,11 +40,6 @@ public class WebSocketController {
             throw new AuthenticationCredentialsNotFoundException("Not authenticated");
         }
 
-        String username = auth.getName();
-
-        log.info("Received message for chat {} from user {}", chatId, username);
-        log.info("Message content: {}", messageDto);
-
         if (messageDto == null || messageDto.getContent() == null || messageDto.getContent().trim().isEmpty()) {
             log.error("Invalid message content");
             throw new IllegalArgumentException("Message content cannot be empty");
@@ -53,7 +50,8 @@ public class WebSocketController {
             ChatMessageDto response = messageService.sendMessage(
                 chatId,
                 messageDto.getContent(),
-                username
+                authContext.getUserId(sessionId),
+                auth.getName()
             );
             
             log.info("Sending response to /topic/chat/{}", chatId);

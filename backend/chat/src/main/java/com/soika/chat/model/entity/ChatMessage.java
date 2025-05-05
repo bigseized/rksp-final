@@ -1,7 +1,10 @@
 package com.soika.chat.model.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.time.LocalDateTime;
@@ -25,11 +28,16 @@ public class ChatMessage {
     @Column(nullable = false)
     private String sender;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id",nullable = false)
+    private User user;
+
     @Column(nullable = false)
     private String content;
 
     @Column(nullable = false)
     private LocalDateTime timestamp = LocalDateTime.now();
+
 
     @Override
     public final boolean equals(Object o) {

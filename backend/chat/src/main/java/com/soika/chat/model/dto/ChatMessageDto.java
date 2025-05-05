@@ -11,6 +11,7 @@ public class ChatMessageDto {
     private String sender;
     private String content;
     private LocalDateTime timestamp;
+    private String email;
 
     public static ChatMessageDto fromEntity(ChatMessage entity) {
         ChatMessageDto dto = new ChatMessageDto();
