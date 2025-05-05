@@ -20,7 +20,7 @@ npm install
 
 2. Создайте файл `.env` в корневой директории проекта:
 ```env
-REACT_APP_API_URL=http://localhost:8080
+REACT_APP_API_URL=http://auth_provider:8080
 ```
 
 3. Запустите проект:

@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/soika
+    url: jdbc:postgresql://postgres:5432/soika
     username: postgres
     password: postgres
   jpa:
@@ -17,7 +17,7 @@ spring:
 
 auth:
   service:
-    url: http://localhost:8080
+    url: http://auth-provider:8080
 
 logging:
   level:
@@ -26,7 +26,7 @@ logging:
     com.soika.chat: DEBUG
 
 minio:
-  endpoint: http://localhost:9000 #change to minio host
+  endpoint: http://minio:9000 #change to minio host
   accessKey: minioadmin
   secretKey: minioadmin
   bucket: avatars 

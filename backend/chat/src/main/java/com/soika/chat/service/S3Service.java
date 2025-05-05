@@ -21,14 +21,11 @@ public class S3Service {
 
     private final MinioClient minioClient;
     private final String bucketName;
-    private final int presignedUrlExpirationMinutes;
 
     public S3Service(MinioClient minioClient, 
-                    @Value("${minio.bucket}") String bucketName,
-                    @Value("${minio.presigned-url-expiration:60}") int presignedUrlExpirationMinutes) {
+                    @Value("${minio.bucket}") String bucketName) {
         this.minioClient = minioClient;
         this.bucketName = bucketName;
-        this.presignedUrlExpirationMinutes = presignedUrlExpirationMinutes;
     }
     
 

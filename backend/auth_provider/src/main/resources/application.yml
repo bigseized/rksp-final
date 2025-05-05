@@ -2,7 +2,7 @@ spring:
   application:
     name: auth_provider
   datasource:
-    url: jdbc:postgresql://localhost:5432/soika
+    url: jdbc:postgresql://postgres:5432/soika
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: postgres
