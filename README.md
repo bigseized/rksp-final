@@ -3,7 +3,7 @@
 Корпоративный чат с поддержкой личных и групповых сообщений.
 
 - [Frontend (React, TypeScript)](./frontend/README.md)
-- [Backend (Spring Boot, Kotlin)](./backend/README.md)
+- [Backend (Spring Boot, Java)](./backend/README.md)
 
 ## Быстрый старт (Docker Compose)
 
