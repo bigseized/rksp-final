@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: auth_provider
+  datasource:
+    url: jdbc:postgresql://postgres:5432/soika
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: postgres
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+
+
+jwt:
+  secret: c65377d88e7b2331806766762d97d0c6eeb93ff69ae2166d87cb1c720d540602ce35e2985937a27e818e29f0dc8be4008191cb4a427143f91ec07b3d8d90ae8bdef71928a10596655c93ba78fb9d3711e88de2bc5800ddce6f88da08f0ea4eb6106cc7a8972c8f8ce841c44b58e27d2478a4e3cc30e121d0810df166033a5fa75e9ebd888b7943c88f4e909d06200f4905ef6646d830e3f590439f0cb7582898734407cc31e89f28dabc733c6db39a02cfa0929dfcdbf1724065a52a6655d405c8688fcba38233831c34a62082ac9d8cc218be6310da9fdcb232461748ba69dd4de260ee9699716b86e1ea0a0ef5c1884a6d69dab665b67a2601fb2927abd13a
+  expiration: 86400000 # 24 hours in milliseconds
